@@ -8,10 +8,13 @@ import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.captainhuang.throwline.R;
@@ -24,9 +27,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView;
     private Button btn;
     private TwoPointThrowView tThrowView;
+    private EditText editText;
     private int count = 500;
     private float a = 0f, b = 0f, c = 0f;
     Keyframe[] keyframes;
+    int[] endLocation = new int[2];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         count = (int) (Util.getScreenWidth(this) - 2 * Util.dip2px(this, 25));
         keyframes = new Keyframe[count];
         textView = findViewById(R.id.tv_1);
+        editText = findViewById(R.id.end_point);
         btn = findViewById(R.id.anim_start);
         tThrowView = new TwoPointThrowView(this);
         tThrowView = findViewById(R.id.t_throw);
@@ -67,8 +73,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void initListener() {
         btn.setOnClickListener(v -> {
+                String[] str = editText.getText().toString().split(",");
+                endLocation[0] = Integer.parseInt(str[0]);
+                endLocation[1] = Integer.parseInt(str[1]);
 //            startThrow();
-            tThrowView.startThrow("", new int[]{0, 0}, new int[]{0, 0});
+            tThrowView.startThrow(this.getResources().getDrawable(R.drawable.game_gift_heart), new int[]{0, 0}, endLocation);
         });
     }
 
@@ -100,4 +109,5 @@ public class MainActivity extends AppCompatActivity {
         animatorSet.start();
 
     }
+
 }

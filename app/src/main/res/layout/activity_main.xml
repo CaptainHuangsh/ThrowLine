@@ -18,6 +18,12 @@
         android:layout_alignParentTop="true"
         android:background="@color/transparent"/>
 
+    <EditText
+        android:id="@+id/end_point"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/anim_start"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content" />
     <Button
         android:id="@+id/anim_start"
         android:layout_width="96dp"
