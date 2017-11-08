@@ -1,10 +1,13 @@
 package com.captainhuang.throwline.Views;
 
+import android.animation.AnimatorSet;
 import android.animation.Keyframe;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -28,7 +31,6 @@ public class TwoPointThrowView extends FrameLayout {
 
     private static final String TAG = TwoPointThrowView.class.getName();
     private ViewGroup viewGroup;
-    private TextView textView;
     private int count = 500;
     private float a = 0f, b = 0f, c = 0f;
     Keyframe[] keyframes;
@@ -51,9 +53,9 @@ public class TwoPointThrowView extends FrameLayout {
     }
 
     private void initView() {
+        viewGroup = createAnimLayout();
         count = (int) (Util.getScreenWidth(mContext) - 2 * Util.dip2px(mContext, 25));
         keyframes = new Keyframe[count];
-        textView = findViewById(R.id.tv_1);
         Point sPoint = new Point(0, Util.getScreenHeight(mContext) / 2);
         Point ePoint = new Point((int) (Util.getScreenWidth(mContext) - 2 * Util.dip2px(mContext, 25)), Util.getScreenHeight(mContext) / 2 + 50);
         float[][] points = {{sPoint.x, sPoint.y}, {ePoint.x, ePoint.y}};
@@ -64,18 +66,23 @@ public class TwoPointThrowView extends FrameLayout {
         Log.i("abcis: ", a + " " + b + " " + c);
     }
 
-    private void startThrow(int[] startLocation, int[] endLocation) {
+    @SuppressLint("NewApi")
+    public void startThrow(String flowName, int[] startLocation, int[] endLocation) {
 
+        int viewSize = (int) Util.dip2px(mContext,25);
         final float keyStep = 1f / (float) count;
         float key = keyStep;
-
+        View imageView = new View(mContext);
+        imageView.setBackground(mContext.getResources().getDrawable(R.drawable.game_gift_shoes));
         for (int i = 0; i < count; i++) {
             keyframes[i] = Keyframe.ofFloat(key, i + 1);
             Log.i("keyframesX" + i, "" + keyframes[i]);
             key += keyStep;
         }
         PropertyValuesHolder pvhX = PropertyValuesHolder.ofKeyframe("translationX", keyframes);
-
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(viewSize, viewSize);
+        imageView.setLayoutParams(layoutParams);
+        viewGroup.addView(imageView);// 把要移动的控件添加到动画层
         key = keyStep;
         for (int i = 0; i < count; i++) {
             Log.i("keyframesY" + i, "" + keyframes[i]);
@@ -83,9 +90,13 @@ public class TwoPointThrowView extends FrameLayout {
             key += keyStep;
         }
         PropertyValuesHolder pvhY = PropertyValuesHolder.ofKeyframe("translationY", keyframes);
-        ObjectAnimator yxThrow = ObjectAnimator.ofPropertyValuesHolder(textView, pvhX, pvhY).setDuration(1000);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(imageView, "rotation", 0f, 360f);
+        ObjectAnimator yxThrow = ObjectAnimator.ofPropertyValuesHolder(imageView, pvhX, pvhY);
         yxThrow.setInterpolator(new OvershootInterpolator());
-        yxThrow.start();
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.setDuration(2000);
+        animatorSet.play(yxThrow).with(anim);
+        animatorSet.start();
     }
 
     /**

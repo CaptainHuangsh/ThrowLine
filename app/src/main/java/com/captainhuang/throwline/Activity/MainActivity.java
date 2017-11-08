@@ -1,5 +1,6 @@
 package com.captainhuang.throwline.Activity;
 
+import android.animation.AnimatorSet;
 import android.animation.Keyframe;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
@@ -7,17 +8,22 @@ import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.animation.Animation;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.captainhuang.throwline.R;
+import com.captainhuang.throwline.Views.TwoPointThrowView;
 import com.captainhuang.throwline.utils.ParabolaAlgorithm;
 import com.captainhuang.throwline.utils.Util;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView textView;
+    private Button btn;
+    private TwoPointThrowView tThrowView;
     private int count = 500;
     private float a = 0f, b = 0f, c = 0f;
     Keyframe[] keyframes;
@@ -34,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
         count = (int) (Util.getScreenWidth(this) - 2 * Util.dip2px(this, 25));
         keyframes = new Keyframe[count];
         textView = findViewById(R.id.tv_1);
+        btn = findViewById(R.id.anim_start);
+        tThrowView = new TwoPointThrowView(this);
+        tThrowView = findViewById(R.id.t_throw);
         Point sPoint = new Point(0, Util.getScreenHeight(this) / 2);
         Point ePoint = new Point((int) (Util.getScreenWidth(this) - 2 * Util.dip2px(this, 25)), Util.getScreenHeight(this) / 2 + 50);
         Point hPoint = new Point(Util.getScreenWidth(this) / 2, sPoint.y < ePoint.y ? sPoint.y : ePoint.y - 150);
@@ -53,11 +62,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     private float getY(int i) {
-        return (float) (a * i * i + b * i + c);
+        return a * i * i + b * i + c;
     }
 
     private void initListener() {
-        textView.setOnClickListener(v -> startThrow());
+        btn.setOnClickListener(v -> {
+//            startThrow();
+            tThrowView.startThrow("", new int[]{0, 0}, new int[]{0, 0});
+        });
     }
 
     private void startThrow() {
@@ -79,10 +91,13 @@ public class MainActivity extends AppCompatActivity {
             key += keyStep;
         }
         PropertyValuesHolder pvhY = PropertyValuesHolder.ofKeyframe("translationY", keyframes);
-        ObjectAnimator yxThrow = ObjectAnimator.ofPropertyValuesHolder(textView, pvhX, pvhY).setDuration(2000);
-//        ObjectAnimator yxThrow = ObjectAnimator.ofPropertyValuesHolder(textView,pvhX,pvhY).setDuration(800);
-//        ObjectAnimator yxThrow = ObjectAnimator.ofPropertyValuesHolder(textView,pvhX).setDuration(800);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(textView, "rotation", 0f, 360f);
+        ObjectAnimator yxThrow = ObjectAnimator.ofPropertyValuesHolder(textView, pvhX, pvhY);
         yxThrow.setInterpolator(new OvershootInterpolator());
-        yxThrow.start();
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.setDuration(2000);
+        animatorSet.play(yxThrow).with(anim);
+        animatorSet.start();
+
     }
 }
